@@ -1,24 +1,27 @@
-version: '3'
+version: '3.3'
 
 services:
   data-db:
     image: machbase/machbase
     volumes:
-      - data_machbase:/home/machbase/machbase/dbs
-    ports:
-      - "5656:5656"
+      - machdata:/home/machbase/machbase/dbs
+    stdin_open: true
+    tty: true
+    expose:
+      - "5001"
+      - "5656"
 
   web-db:
     image: postgres:11
     environment:
       - POSTGRES_DB=uyeg
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=suin1098
+      - POSTGRES_USER=its
+      - POSTGRES_PASSWORD=1234QWER
       - POSTGRES_INITDB_ARGS=--encoding=UTF-8
     ports:
       - "5432:5432"
     volumes:
-      - data_postgres:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
 
   web:
     build:
@@ -30,8 +33,10 @@ services:
     ports:
       - "5000:5000"
     links:
+      - data-db
       - web-db
     depends_on:
+      - data-db
       - web-db
     working_dir: /
     command: flask run -h 0.0.0.0
@@ -39,5 +44,5 @@ services:
       - ./app/:/app/
 
 volumes:
-  data_postgres: {}
-  data_machbase: {}
+  pgdata: {}
+  machdata: {}
